@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)file:///C:/Users/kabza/Downloads/journal.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unchained — Healing Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./journal_files/css2" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --gold: #E8C547; --dark: #0A0A0A; --dark2: #111; --dark3: #161616;
+    --border: #1E1E1E; --text: #C8BFA8; --muted: #8A8272; --dim: #555;
+  }
+  html, body { height: 100%; }
+  body { background: var(--dark); color: var(--text); font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.8; overflow-x: hidden; }
+
+  /* ── AUTH ── */
+  #auth-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .auth-logo-label { font-size: 10px; letter-spacing: 6px; color: #444; text-transform: uppercase; margin-bottom: 12px; text-align: center; }
+  .auth-logo { font-family: 'Cinzel', serif; font-size: 44px; color: var(--gold); letter-spacing: 5px; font-weight: 700; text-align: center; }
+  .auth-rule { width: 60px; height: 1px; background: var(--gold); margin: 16px auto 40px; }
+  .auth-card { width: 100%; max-width: 400px; background: var(--dark2); border: 1px solid #222; border-radius: 6px; padding: 32px; }
+  .auth-tabs { display: flex; margin-bottom: 28px; border-bottom: 1px solid #222; }
+  .auth-tab { flex: 1; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--dim); padding: 10px; cursor: pointer; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-family: inherit; margin-bottom: -1px; transition: all 0.2s; }
+  .auth-tab.active { border-bottom-color: var(--gold); color: var(--gold); }
+  .field { margin-bottom: 16px; }
+  .field label { font-size: 10px; letter-spacing: 3px; color: #888; text-transform: uppercase; display: block; margin-bottom: 8px; }
+  .field input { width: 100%; background: #0D0D0D; border: 1px solid #2A2A2A; border-radius: 4px; padding: 11px 14px; color: var(--text); font-size: 15px; font-family: 'EB Garamond', serif; outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--gold); }
+  .auth-error { color: #E85A5A; font-size: 13px; margin-bottom: 12px; line-height: 1.5; display: none; }
+  .btn-gold { width: 100%; background: var(--gold); border: none; color: var(--dark); padding: 12px; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; cursor: pointer; border-radius: 2px; margin-top: 8px; transition: opacity 0.2s; }
+  .btn-gold:hover { opacity: 0.88; }
+  .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-note { font-size: 12px; color: #444; line-height: 1.7; text-align: center; margin-top: 16px; }
+
+  /* ── APP ── */
+  #app-screen { display: none; min-height: 100vh; flex-direction: column; }
+
+  /* Header */
+  .app-header { border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 16px; background: var(--dark); position: sticky; top: 0; z-index: 100; }
+  .app-logo { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold); letter-spacing: 3px; flex-shrink: 0; }
+  .progress-wrap { flex: 1; max-width: 320px; }
+  .progress-labels { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .progress-label { font-size: 10px; color: #444; letter-spacing: 1px; text-transform: uppercase; }
+  .progress-bar-bg { height: 2px; background: var(--border); border-radius: 2px; }
+  .progress-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s; width: 0%; }
+  .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .header-name { font-size: 13px; color: var(--text); flex-shrink: 0; }
+  .btn-sm { background: transparent; border: 1px solid #2A2A2A; color: var(--dim); padding: 5px 12px; cursor: pointer; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; font-family: inherit; transition: all 0.2s; flex-shrink: 0; }
+  .btn-sm:hover { border-color: #444; color: var(--muted); }
+  .btn-sm.gold { border-color: var(--gold); color: var(--gold); }
+  .btn-sm.gold:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Body */
+  .app-body { display: flex; flex: 1; }
+
+  /* Sidebar */
+  .sidebar { width: 210px; border-right: 1px solid var(--border); padding: 20px 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
+  .nav-btn { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: transparent; border: none; border-left: 3px solid transparent; color: var(--dim); cursor: pointer; text-align: left; font-size: 12px; font-family: inherit; transition: all 0.15s; width: 100%; line-height: 1.4; }
+  .nav-btn.active { background: #141414; border-left-color: var(--section-color, var(--gold)); color: var(--text); }
+  .nav-btn:hover:not(.active) { color: var(--muted); }
+  .nav-icon { font-size: 13px; flex-shrink: 0; }
+  .nav-label { flex: 1; }
+  .nav-check { font-size: 10px; }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--section-color, var(--gold)); opacity: 0.5; flex-shrink: 0; }
+
+  /* Main */
+  .main { flex: 1; padding: 40px 48px; max-width: 700px; overflow-y: auto; }
+  .section-header { margin-bottom: 32px; }
+  .section-title-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .section-icon-big { font-size: 22px; }
+  .section-title { font-family: 'Cinzel', serif; font-size: 26px; color: var(--text); }
+  .section-intro { border-left: 3px solid var(--section-color, var(--gold)); padding-left: 16px; }
+  .section-intro p { font-size: 15px; color: var(--muted); font-style: italic; line-height: 1.8; margin-bottom: 8px; }
+
+  /* Welcome */
+  .affirmation-card { background: var(--dark2); border: 1px solid rgba(232,197,71,0.2); border-radius: 4px; padding: 24px; margin-bottom: 20px; }
+  .affirmation-label { font-size: 10px; letter-spacing: 4px; color: #444; text-transform: uppercase; margin-bottom: 12px; }
+  .affirmation-text { font-size: 17px; color: var(--gold); font-style: italic; line-height: 1.7; margin-bottom: 16px; }
+  .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 6px 16px; cursor: pointer; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; font-family: inherit; transition: all 0.2s; }
+  .btn-outline:hover { background: rgba(232,197,71,0.08); }
+  .welcome-card { background: var(--dark2); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+  .welcome-card p { font-size: 14px; color: var(--dim); line-height: 1.6; }
+  .welcome-card p span { color: var(--gold); }
+  .welcome-tip { display: flex; gap: 12px; padding: 14px 16px; background: #0D0D0D; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 8px; }
+  .welcome-tip-icon { color: var(--gold); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .welcome-tip p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* Prompts */
+  .prompts { display: flex; flex-direction: column; gap: 36px; }
+  .prompt-block {}
+  .prompt-header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+  .prompt-num { font-size: 10px; color: var(--section-color, var(--gold)); font-family: monospace; padding-top: 4px; flex-shrink: 0; letter-spacing: 2px; }
+  .prompt-q { font-size: 15px; color: var(--text); font-weight: 500; line-height: 1.6; }
+  .prompt-textarea { width: 100%; background: #0D0D0D; border: 1px solid var(--border); border-radius: 4px; padding: 14px; color: #D0C8B8; font-size: 14px; line-height: 1.85; font-family: 'EB Garamond', serif; resize: vertical; outline: none; transition: border-color 0.2s; min-height: 140px; }
+  .prompt-textarea:focus, .prompt-textarea.has-content { border-color: rgba(232,197,71,0.3); }
+  .prompt-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .word-count { font-size: 10px; color: #333; }
+  .save-btn { background: transparent; border: 1px solid var(--section-color, var(--gold)); color: var(--section-color, var(--gold)); padding: 4px 14px; cursor: pointer; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; font-family: inherit; transition: all 0.2s; }
+  .save-btn.saved { background: var(--section-color, var(--gold)); color: var(--dark); }
+
+  /* Nav footer */
+  .nav-footer { display: flex; justify-content: space-between; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .btn-prev { background: transparent; border: 1px solid #222; color: var(--dim); padding: 9px 20px; cursor: pointer; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; font-family: inherit; }
+  .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-next { background: var(--section-color, var(--gold)); border: 1px solid var(--section-color, var(--gold)); color: var(--dark); padding: 9px 20px; cursor: pointer; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; border-radius: 2px; font-family: inherit; font-weight: 700; transition: opacity 0.2s; }
+  .btn-next:disabled { background: transparent; border-color: #222; color: #333; cursor: not-allowed; }
+  .btn-next:not(:disabled):hover { opacity: 0.88; }
+
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 20px; }
+    .app-header { padding: 12px 16px; }
+    .header-name { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── AUTH SCREEN ── -->
+<div id="auth-screen">
+  <div class="auth-logo-label">A Healing Journal for Survivors</div>
+  <div class="auth-logo">UNCHAINED</div>
+  <div class="auth-rule"></div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="setMode(&#39;login&#39;)">Sign In</button>
+      <button class="auth-tab" onclick="setMode(&#39;signup&#39;)">Create Account</button>
+    </div>
+
+    <div id="field-name" class="field" style="display:none">
+      <label>Your Name</label>
+      <input type="text" id="input-name" placeholder="How would you like to be addressed?">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="input-email" placeholder="Your email address" onkeydown="if(event.key===&#39;Enter&#39;)handleAuth()">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="input-password" placeholder="Your password" onkeydown="if(event.key===&#39;Enter&#39;)handleAuth()">
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="btn-gold" id="auth-btn" onclick="handleAuth()">Enter Your Journal →</button>
+    <div class="auth-note" id="auth-note" style="display:none">Your journal entries are private and belong only to you.</div>
+  </div>
+</div>
+
+<!-- ── APP SCREEN ── -->
+<div id="app-screen">
+  <header class="app-header">
+    <div class="app-logo">UNCHAINED</div>
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <span class="progress-label">Progress</span>
+        <span class="progress-label" id="progress-count">0/18</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-sm gold" id="export-btn" onclick="exportJournal()" disabled="">⬇ Export</button>
+      <span class="header-name" id="header-name"></span>
+      <button class="btn-sm" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="main-content"></main>
+  </div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://kebwstdsswdfoppkozxy.supabase.co";
+const SUPABASE_KEY = "sb_publishable_yjK742jX_QVb0z_Hc_vj_w_ADMGTBBO";
+
+// ── Data ────────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  { id: "welcome", title: "You Are Not Alone", icon: "✦", color: "#E8C547",
+    intro: ["What happened to you was real. The pain, the confusion, the shame — all of it was real. And none of it was your fault.", "This journal is a safe space to process what you've been through, reclaim your identity, and walk forward — without guilt, without shame, without permission from anyone."],
+    prompts: [] },
+  { id: "acknowledge", title: "Name What Happened", icon: "◈", color: "#E8835A",
+    intro: ["Healing begins when we stop minimizing our pain. You don't have to call it 'a misunderstanding.' You are allowed to name it for what it was."],
+    prompts: [
+      { id: "a1", q: "Describe what happened to you, in your own words — without softening it for anyone else's comfort.", ph: "Write freely here. This is your space..." },
+      { id: "a2", q: "What were you told about yourself that you now believe was untrue or weaponized against you?", ph: "Perhaps things like: you're rebellious, you lack faith..." },
+      { id: "a3", q: "How did the mistreatment affect your daily life, relationships, and sense of self?", ph: "Think about sleep, trust, self-worth, relationships..." }
+    ]},
+  { id: "guilt", title: "Releasing the Guilt", icon: "◇", color: "#7EB5A6",
+    intro: ["Guilt is often the heaviest thing survivors carry — especially when it was deliberately placed on you. Spiritual abuse thrives on guilt. Reclaiming yourself means examining whose guilt this really is."],
+    prompts: [
+      { id: "g1", q: "What guilt are you still carrying? Write it all out, no matter how irrational it might seem.", ph: "I feel guilty that I left... I feel guilty that I spoke up..." },
+      { id: "g2", q: "For each guilt above — ask yourself: 'Did I create this, or was it handed to me?'", ph: "Be honest with yourself. Some guilt was manufactured by others to control you..." },
+      { id: "g3", q: "Write a letter releasing the guilt that was never yours to carry. Address it to yourself.", ph: "Dear [your name], I am releasing you from the burden of..." }
+    ]},
+  { id: "identity", title: "Reclaiming Your Identity", icon: "◉", color: "#B47EB5",
+    intro: ["Spiritual abuse often strips people of their identity. This is about remembering who YOU actually are."],
+    prompts: [
+      { id: "i1", q: "Before the hurt began — who were you? What did you love, value, believe?", ph: "Think about your curiosity, your humor, your passions..." },
+      { id: "i2", q: "What parts of yourself were suppressed, mocked, or punished in that environment?", ph: "Your questions, your opinions, your emotions, your ambitions..." },
+      { id: "i3", q: "Write 10 true things about who you are that no institution can define or take away.", ph: "1. I am someone who...\n2. I believe...\n3. I value..." }
+    ]},
+  { id: "anger", title: "Your Anger is Valid", icon: "▲", color: "#E85A5A",
+    intro: ["You may have been taught that anger is a sin. It isn't. Anger is information. You are allowed to feel it fully."],
+    prompts: [
+      { id: "an1", q: "What are you angry about? Write it without apology. Let it be as big as it actually is.", ph: "I am angry that... I am furious that..." },
+      { id: "an2", q: "Were you taught that expressing anger was sinful? How has that affected you?", ph: "Think about how you've suppressed yourself, what it cost you..." },
+      { id: "an3", q: "What would you say to the people who hurt you, if there were zero consequences?", ph: "This is private. Be honest. You deserve to say what was never allowed..." }
+    ]},
+  { id: "boundaries", title: "Building New Boundaries", icon: "▣", color: "#5A8CE8",
+    intro: ["You get to decide what you let in from here. Your beliefs, your community — all of it is yours to define."],
+    prompts: [
+      { id: "b1", q: "What do you no longer accept from people, communities, or institutions?", ph: "I will no longer tolerate... I will walk away from any situation where..." },
+      { id: "b2", q: "What does healthy community look like to you NOW — on your own terms?", ph: "This might look very different from what you were raised with, and that's okay..." },
+      { id: "b3", q: "Who in your life currently respects these boundaries? Who doesn't?", ph: "Be honest — even if some of those answers are hard..." }
+    ]},
+  { id: "forward", title: "Walking Forward", icon: "→", color: "#5AE8A0",
+    intro: ["You survived something designed to break you. You're still here. That is extraordinary strength."],
+    prompts: [
+      { id: "f1", q: "What does healing mean to you personally — on your own terms?", ph: "Maybe it's peace, maybe it's joy, maybe it's feeling safe in your own skin..." },
+      { id: "f2", q: "What is one courageous thing you can do this week to honor your healing?", ph: "It doesn't have to be huge. It just has to be yours..." },
+      { id: "f3", q: "Write a message to a future version of yourself — one year from now.", ph: "One year from now, I hope you know that... I hope you've allowed yourself to..." }
+    ]}
+];
+
+const AFFIRMATIONS = [
+  "What was done to you was wrong. Full stop.",
+  "You are allowed to heal at your own pace.",
+  "Leaving was not betrayal. It was survival.",
+  "Your questions were never the problem.",
+  "You do not need their forgiveness to forgive yourself.",
+  "Doubt is not weakness. It is honesty.",
+  "You are allowed to be angry.",
+  "Your pain was caused by people — not by God.",
+  "You get to define what healing looks like for you.",
+  "You are more than what was done to you."
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let STATE = { token: null, userId: null, displayName: "", entries: {}, currentSection: 0, affirmIdx: 0, mode: "login", autoSaveTimers: {} };
+
+// ── Supabase helpers ──────────────────────────────────────────────────────────
+async function sbFetch(path, opts = {}) {
+  const r = await fetch(SUPABASE_URL + path, { ...opts, headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json", ...(opts.headers || {}) } });
+  return { data: await r.json(), ok: r.ok };
+}
+async function sbAuth(path, body) {
+  return sbFetch("/auth/v1" + path, { method: "POST", body: JSON.stringify(body) });
+}
+async function sbDb(path, method = "GET", body = null, prefer = "") {
+  return sbFetch("/rest/v1" + path, { method, body: body ? JSON.stringify(body) : null, headers: { "Authorization": "Bearer " + STATE.token, ...(prefer ? { "Prefer": prefer } : {}) } });
+}
+async function upsert(table, data) {
+  return sbFetch("/rest/v1/" + table, { method: "POST", body: JSON.stringify(data), headers: { "Authorization": "Bearer " + STATE.token, "Prefer": "resolution=merge-duplicates,return=minimal" } });
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  STATE.mode = mode;
+  document.querySelectorAll(".auth-tab").forEach((t, i) => t.classList.toggle("active", (i === 0) === (mode === "login")));
+  document.getElementById("field-name").style.display = mode === "signup" ? "block" : "none";
+  document.getElementById("auth-btn").textContent = mode === "login" ? "Enter Your Journal →" : "Begin Your Journey →";
+  document.getElementById("auth-note").style.display = mode === "signup" ? "block" : "none";
+  document.getElementById("auth-error").style.display = "none";
+}
+
+function showError(msg) {
+  const el = document.getElementById("auth-error");
+  el.textContent = msg; el.style.display = "block";
+}
+
+async function handleAuth() {
+  const btn = document.getElementById("auth-btn");
+  const email = document.getElementById("input-email").value.trim();
+  const password = document.getElementById("input-password").value;
+  const name = document.getElementById("input-name").value.trim();
+  document.getElementById("auth-error").style.display = "none";
+  btn.disabled = true; btn.textContent = "Please wait...";
+  try {
+    if (STATE.mode === "signup") {
+      if (!name || !email || !password) { showError("Please fill in all fields."); btn.disabled = false; btn.textContent = "Begin Your Journey →"; return; }
+      if (password.length < 6) { showError("Password must be at least 6 characters."); btn.disabled = false; btn.textContent = "Begin Your Journey →"; return; }
+      const { data, ok } = await sbAuth("/signup", { email, password });
+      if (!ok) { showError(data.msg || data.message || "Sign up failed. Please try again."); btn.disabled = false; btn.textContent = "Begin Your Journey →"; return; }
+      STATE.token = data.access_token; STATE.userId = data.user.id; STATE.displayName = name;
+      await upsert("profiles", { id: STATE.userId, display_name: name });
+    } else {
+      if (!email || !password) { showError("Please fill in all fields."); btn.disabled = false; btn.textContent = "Enter Your Journal →"; return; }
+      const { data, ok } = await sbAuth("/token?grant_type=password", { email, password });
+      if (!ok) { showError("Incorrect email or password."); btn.disabled = false; btn.textContent = "Enter Your Journal →"; return; }
+      STATE.token = data.access_token; STATE.userId = data.user.id;
+      const { data: profile } = await sbDb("/profiles?id=eq." + STATE.userId + "&select=display_name");
+      STATE.displayName = profile?.[0]?.display_name || "Friend";
+      const { data: entries } = await sbDb("/journal_entries?user_id=eq." + STATE.userId + "&select=prompt_id,content");
+      if (Array.isArray(entries)) entries.forEach(e => { STATE.entries[e.prompt_id] = e.content; });
+      const { data: meta } = await sbDb("/user_meta?user_id=eq." + STATE.userId + "&select=last_section");
+      if (meta?.[0]?.last_section) {
+        const idx = SECTIONS.findIndex(s => s.id === meta[0].last_section);
+        if (idx >= 0) STATE.currentSection = idx;
+      }
+    }
+    showApp();
+  } catch(e) { showError("Something went wrong. Please try again."); btn.disabled = false; btn.textContent = STATE.mode === "login" ? "Enter Your Journal →" : "Begin Your Journey →"; }
+}
+
+function handleLogout() {
+  STATE = { token: null, userId: null, displayName: "", entries: {}, currentSection: 0, affirmIdx: 0, mode: "login", autoSaveTimers: {} };
+  document.getElementById("auth-screen").style.display = "flex";
+  document.getElementById("app-screen").style.display = "none";
+  document.getElementById("input-email").value = "";
+  document.getElementById("input-password").value = "";
+  document.getElementById("auth-btn").disabled = false;
+  document.getElementById("auth-btn").textContent = "Enter Your Journal →";
+  setMode("login");
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById("auth-screen").style.display = "none";
+  document.getElementById("app-screen").style.display = "flex";
+  document.getElementById("header-name").textContent = STATE.displayName;
+  renderSidebar(); renderSection(); updateProgress();
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.innerHTML = SECTIONS.map((s, i) => {
+    const done = s.prompts.length > 0 && s.prompts.every(p => STATE.entries[p.id]?.trim());
+    const started = s.prompts.some(p => STATE.entries[p.id]?.trim());
+    const active = i === STATE.currentSection;
+    return `<button class="nav-btn ${active ? "active" : ""}" style="--section-color:${s.color}" onclick="goSection(${i})">
+      <span class="nav-icon" style="color:${s.color}">${s.icon}</span>
+      <span class="nav-label">${s.title}</span>
+      ${done ? `<span class="nav-check" style="color:${s.color}">✓</span>` : started ? `<span class="nav-dot" style="background:${s.color}"></span>` : ""}
+    </button>`;
+  }).join("");
+}
+
+function goSection(idx) {
+  STATE.currentSection = idx;
+  renderSidebar(); renderSection();
+  upsert("user_meta", { user_id: STATE.userId, last_section: SECTIONS[idx].id, updated_at: new Date().toISOString() });
+}
+
+function updateProgress() {
+  const total = SECTIONS.flatMap(s => s.prompts).length;
+  const done = SECTIONS.flatMap(s => s.prompts).filter(p => STATE.entries[p.id]?.trim()).length;
+  document.getElementById("progress-count").textContent = done + "/" + total;
+  document.getElementById("progress-fill").style.width = Math.round((done / total) * 100) + "%";
+  document.getElementById("export-btn").disabled = done === 0;
+}
+
+function renderSection() {
+  const s = SECTIONS[STATE.currentSection];
+  const main = document.getElementById("main-content");
+  const isFirst = STATE.currentSection === 0;
+  const isLast = STATE.currentSection === SECTIONS.length - 1;
+  const next = !isLast ? SECTIONS[STATE.currentSection + 1] : null;
+
+  let html = `<div class="section-header" style="--section-color:${s.color}">
+    <div class="section-title-row">
+      <span class="section-icon-big" style="color:${s.color}">${s.icon}</span>
+      <h1 class="section-title">${s.title}</h1>
+    </div>
+    <div class="section-intro" style="border-left-color:${s.color}">
+      ${s.intro.map(p => `<p>${p}</p>`).join("")}
+    </div>
+  </div>`;
+
+  if (s.id === "welcome") {
+    html += `<div class="affirmation-card">
+      <div class="affirmation-label">Daily Affirmation</div>
+      <div class="affirmation-text" id="affirmation-text">"${AFFIRMATIONS[STATE.affirmIdx]}"</div>
+      <button class="btn-outline" onclick="nextAffirmation()">Next →</button>
+    </div>
+    <div class="welcome-card">
+      <p>Welcome back, <span>${STATE.displayName}</span>. Your entries are saved privately to your account.</p>
+    </div>
+    ${[
+      { icon: "◈", text: "This journal belongs to you alone. No one can tell you how to use it." },
+      { icon: "◇", text: "There is no right order. Go where you feel called." },
+      { icon: "▲", text: "If a prompt feels too big, one sentence is enough." },
+      { icon: "✦", text: "You are building something no one can take from you." }
+    ].map(t => `<div class="welcome-tip"><span class="welcome-tip-icon" style="color:${s.color}">${t.icon}</span><p>${t.text}</p></div>`).join("")}`;
+  }
+
+  if (s.prompts.length > 0) {
+    html += `<div class="prompts" style="--section-color:${s.color}">` +
+      s.prompts.map((p, i) => {
+        const val = STATE.entries[p.id] || "";
+        const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+        return `<div class="prompt-block">
+          <div class="prompt-header">
+            <span class="prompt-num" style="color:${s.color}">0${i+1}</span>
+            <p class="prompt-q">${p.q}</p>
+          </div>
+          <textarea class="prompt-textarea ${val ? "has-content" : ""}" id="ta-${p.id}" placeholder="${p.ph}" rows="6" oninput="handleInput('${p.id}', this)">${val}</textarea>
+          <div class="prompt-footer">
+            <span class="word-count" id="wc-${p.id}">${words > 0 ? words + " words · auto-saved" : "auto-saved as you write"}</span>
+            <button class="save-btn" id="sb-${p.id}" style="border-color:${s.color};color:${s.color}" onclick="manualSave('${p.id}', '${s.color}')">Save Entry</button>
+          </div>
+        </div>`;
+      }).join("") + "</div>";
+  }
+
+  html += `<div class="nav-footer">
+    <button class="btn-prev" ${isFirst ? "disabled" : ""} onclick="goSection(${STATE.currentSection - 1})">← Previous</button>
+    <button class="btn-next" style="${!isLast ? `background:${s.color};border-color:${s.color}` : "background:transparent;border-color:#222;color:#444"}" ${isLast ? "disabled" : ""} onclick="goSection(${STATE.currentSection + 1})">
+      ${isLast ? "✦ Journey Complete" : "Next: " + next.title + " →"}
+    </button>
+  </div>`;
+
+  main.innerHTML = html;
+  main.scrollTop = 0;
+}
+
+function nextAffirmation() {
+  STATE.affirmIdx = (STATE.affirmIdx + 1) % AFFIRMATIONS.length;
+  document.getElementById("affirmation-text").textContent = '"' + AFFIRMATIONS[STATE.affirmIdx] + '"';
+}
+
+function handleInput(id, el) {
+  STATE.entries[id] = el.value;
+  el.classList.toggle("has-content", !!el.value.trim());
+  const words = el.value.trim() ? el.value.trim().split(/\s+/).length : 0;
+  document.getElementById("wc-" + id).textContent = words > 0 ? words + " words · auto-saved" : "auto-saved as you write";
+  updateProgress();
+  clearTimeout(STATE.autoSaveTimers[id]);
+  STATE.autoSaveTimers[id] = setTimeout(() => saveEntry(id, el.value), 2000);
+}
+
+async function saveEntry(id, content) {
+  await upsert("journal_entries", { user_id: STATE.userId, prompt_id: id, content, updated_at: new Date().toISOString() });
+}
+
+async function manualSave(id, color) {
+  const btn = document.getElementById("sb-" + id);
+  btn.textContent = "Saving..."; btn.disabled = true;
+  await saveEntry(id, STATE.entries[id] || "");
+  btn.textContent = "✓ Saved"; btn.style.background = color; btn.style.color = "#0A0A0A";
+  setTimeout(() => { btn.textContent = "Save Entry"; btn.style.background = "transparent"; btn.style.color = color; btn.disabled = false; }, 2000);
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function exportJournal() {
+  const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const allPrompts = SECTIONS.flatMap(s => s.prompts.map(p => ({ ...p, sectionTitle: s.title, sectionIcon: s.icon })));
+  const filled = allPrompts.filter(p => STATE.entries[p.id]?.trim());
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  const blocks = SECTIONS.filter(s => s.prompts.some(p => STATE.entries[p.id]?.trim())).map(s =>
+    `<div class="section"><div class="sh"><span>${s.icon}</span><span>${s.title}</span></div>` +
+    s.prompts.filter(p => STATE.entries[p.id]?.trim()).map(p =>
+      `<div class="pb"><div class="pq">${esc(p.q)}</div><div class="pa">${esc(STATE.entries[p.id])}</div></div>`
+    ).join("") + "</div>"
+  ).join("");
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Unchained — ${STATE.displayName}</title>
+  <style>body{font-family:Georgia,serif;color:#1a1a1a;padding:60px;max-width:760px;margin:0 auto}.cover{text-align:center;padding:72px 0 48px;border-bottom:2px solid #1a1a1a;margin-bottom:48px}.t{font-size:48px;font-weight:bold;letter-spacing:6px;margin-bottom:6px}.n{font-size:20px;font-weight:600}.d{font-size:12px;color:#aaa;margin-top:6px}.section{margin-bottom:48px}.sh{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;padding-bottom:12px;border-bottom:1px solid #e0e0e0;margin-bottom:24px}.pb{margin-bottom:28px}.pq{font-size:13px;font-weight:600;color:#555;margin-bottom:10px;font-style:italic}.pa{font-size:15px;line-height:1.9;padding:18px;background:#fafafa;border-left:3px solid #ddd}.foot{text-align:center;margin-top:60px;padding-top:24px;border-top:1px solid #e0e0e0;font-size:11px;color:#bbb}</style>
+  </head><body><div class="cover"><div class="t">UNCHAINED</div><div style="font-style:italic;color:#999;margin:10px 0 28px;font-size:15px">A Healing Journal for Survivors</div><div class="n">${esc(STATE.displayName)}</div><div class="d">${date} · ${filled.length} entries</div></div>${blocks}<div class="foot">Unchained · healingwithoutguilt.com · ${date}</div></body></html>`;
+  const blob = new Blob([html], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Unchained-Journal-" + STATE.displayName.replace(/\s+/g,"-") + ".html";
+  a.click();
+}
+</script>
+
+
+</body></html>
